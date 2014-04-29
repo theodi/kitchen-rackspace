@@ -111,12 +111,16 @@ module Kitchen
       end
 
       def create_server
-        compute.servers.bootstrap(
-          :name             => config[:server_name],
-          :image_id         => config[:image_id],
-          :flavor_id        => config[:flavor_id],
-          :public_key_path  => config[:public_key_path]
-        )
+        t = Thread.new do
+          @server = compute.servers.bootstrap(
+                      :name             => config[:server_name],
+                      :image_id         => config[:image_id],
+                      :flavor_id        => config[:flavor_id],
+                      :public_key_path  => config[:public_key_path]
+                    )
+        end
+        while @server.nil?; $stdout.write "."; sleep(1); end
+        @server
       end
 
       def images
